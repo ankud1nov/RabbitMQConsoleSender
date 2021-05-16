@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace ConsoleSender
 {
@@ -15,24 +12,26 @@ namespace ConsoleSender
         string hashSumm;
         public Message()
         {
-            number = 1;
+            number = LastNumber();
             comment = "";
             SetParams();
         }
         public Message(string comment)
         {
-            number = 1;
+            number = LastNumber();
             this.comment = comment;
             SetParams();
         }
         public void Next()
         {
-            number += 1;
+            WriteNextNumber(number);
+            number = number + 1;
             SetParams();
         }
         public void Next(string comment)
         {
-            number += 1;
+            WriteNextNumber(number);
+            number = number+1;
             this.comment = comment;
             SetParams();
         }
@@ -43,8 +42,36 @@ namespace ConsoleSender
         void SetParams()
         {
             timeSend = DateTime.Now;
-            text = $"{number}. \"{timeSend}\" Комментарий: {comment}";
+            text = $"{number}. \"{timeSend}\" Комментарий: {comment} Предыдщий хэш: \"{hashSumm}\"";
             hashSumm = $"{number}{timeSend}{comment}";
+        }
+        int LastNumber()
+        {
+            var path = "lastNumber";
+            int number = 1;
+            try
+            {
+                using (StreamReader sr = new StreamReader(path))
+                {
+                    number = Convert.ToInt32(sr.ReadToEnd());
+                }                
+            }
+            catch (Exception e)
+            {
+                using (StreamWriter sw = new StreamWriter(path, false, System.Text.Encoding.Default))
+                {
+                    sw.WriteLine(number);
+                }
+            }
+            return number;
+        }
+        void WriteNextNumber(int number)
+        {
+            var path = "lastNumber";
+            using (StreamWriter sw = new StreamWriter(path, false, System.Text.Encoding.Default))
+            {
+                sw.WriteLine(number + 1);
+            }
         }
     }
 }
